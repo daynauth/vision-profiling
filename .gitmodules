@@ -1,0 +1,9 @@
+[submodule "detect/yolor"]
+	path = detect/yolor
+	url = https://github.com/WongKinYiu/yolor
+[submodule "detect/yolox"]
+	path = detect/yolox
+	url = https://github.com/Megvii-BaseDetection/YOLOX
+[submodule "detect/yolov4"]
+	path = detect/yolov4
+	url = https://github.com/Tianxiaomo/pytorch-YOLOv4
