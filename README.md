@@ -1,4 +1,4 @@
 # Vision Models Profiling
 
-## To do
-[ ] Load all models
+## Per layer latency
+![Faster RCNN](images/layer_time_faster_rcnn.png)
