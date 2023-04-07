@@ -1,9 +1,12 @@
 # Vision Models Profiling
 
 ## Todo
-[x] Build Per Layer Latency Profiler
-[x] Test on RTX 3090
-[] Test on Jetson Nano, Jetson-NX
+- [x] Build Per Layer Latency Profiler
+- [x] Test on RTX 3090
+- [ ] Test on Jetson Devices
+- [ ] Build Memory Profiler
+- [ ] Test on RTX 3090
+- [ ] Test on Jetson Devices
 
 ## Per layer latency
 
