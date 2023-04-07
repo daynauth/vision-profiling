@@ -1,5 +1,10 @@
 # Vision Models Profiling
 
+## Todo
+[x] Build Per Layer Latency Profiler
+[x] Test on RTX 3090
+[] Test on Jetson Nano, Jetson-NX
+
 ## Per layer latency
 
 ### Faster RCNN
