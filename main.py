@@ -24,7 +24,7 @@ def plot_line(df, model_name, scale: float = 1.8):
 
     plt.ylabel('time (ms)')
     plt.xlabel('layers')
-    plt.savefig(f'layer_time_{model_name}.png')
+    plt.savefig(f'images/layer_time_{model_name}.png')
 
 def generate_line_plots(models, models_names, device):
     for model, name in zip(models, models_names):
@@ -71,7 +71,7 @@ def generate_stacked_bar_plot(models, models_names, selected_layers, device):
     plt.ylabel('time (ms)')
     plt.xlabel('models')
     plt.xticks(rotation=0, ha='center')
-    plt.savefig('layer_time_stacked_bar.png')
+    plt.savefig('images/layer_time_stacked_bar.png')
 
 
 def plot_bar(df, model_name):
@@ -80,7 +80,7 @@ def plot_bar(df, model_name):
     plt.xlabel('layers')
     plt.xticks(rotation=75, ha='right')
     plt.tight_layout()
-    plt.savefig(f'layer_time_bar_{model_name}.png')
+    plt.savefig(f'images/layer_time_bar_{model_name}.png')
 
 def generate_bar_plot(models, models_names, device):
     for model, model_name in zip(models, models_names):
