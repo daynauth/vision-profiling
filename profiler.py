@@ -1,6 +1,5 @@
 import torch
 import pandas as pd
-import time
 
 class Record:
     def __init__(self) -> None:
@@ -21,7 +20,7 @@ class Record:
         return output
     
     def to_dataframe(self) -> pd.DataFrame:
-        df = pd.DataFrame.from_dict(self.data, orient='index', )
+        df = pd.DataFrame.from_dict(self.data, orient='index')
         df.reset_index(inplace=True)
         df.rename(columns={'index': 'layer_name'}, inplace=True)
         return df
@@ -33,6 +32,8 @@ class Profiler:
         self.name = name
         self.layers = layers
         self.all_layers = False
+
+        self.starter, self.ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
         
         if self.layers is None:
             self.all_layers = True
@@ -44,29 +45,32 @@ class Profiler:
     def attach_hooks(self, model: torch.nn.Module, name:str) -> None:
         if len(list(model.named_children())) == 0:
             if self.all_layers:
-                self.pre_hooks.append(model.register_forward_pre_hook(self.pre_time_hook(name)))
-                self.post_hooks.append(model.register_forward_hook(self.post_time_hook(name)))
+                self._attach_hooks(model, name)
             else:
                 if isinstance(model, self.layers):
-                    self.pre_hooks.append(model.register_forward_pre_hook(self.pre_time_hook(name)))
-                    self.post_hooks.append(model.register_forward_hook(self.post_time_hook(name)))
+                    self._attach_hooks(model, name)
             return
         
         for n, m in model.named_children():
             self.attach_hooks(m, name + "." + n)
+
+    def _attach_hooks(self, model: torch.nn.Module, name:str) -> None:
+        self.pre_hooks.append(model.register_forward_pre_hook(self.pre_time_hook(name)))
+        self.post_hooks.append(model.register_forward_hook(self.post_time_hook(name)))
     
     def pre_time_hook(self, name: str) -> callable:
         def hook(module, input):
-            module_type = type(module).__name__
-            start_time = time.time()
-            self.record.insert(name, module_type, start_time)
+            self.starter.record()
         return hook
     
     def post_time_hook(self, name: str) -> callable:
         def hook(module, input, output):
-            end_time = time.time()
+            self.ender.record()
+            torch.cuda.synchronize()
+            end_time = self.starter.elapsed_time(self.ender)
+
             module_type = type(module).__name__
-            self.record.insert(name, module_type,(end_time - self.record.get(name)['time']) * 1000)
+            self.record.insert(name, module_type, end_time)
         return hook
     
     def detach_hooks(self) -> None:
@@ -82,11 +86,7 @@ class Profiler:
         self.attach_hooks(self.model, self.name)
 
         with torch.no_grad():
-            #get total time for inference
-            start_time = time.time()
             self.model(image)
-            end_time = time.time()
-            self.record.total_time = end_time - start_time
 
         self.detach_hooks()
 

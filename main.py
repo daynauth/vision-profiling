@@ -11,7 +11,7 @@ def profile(model: torch.nn.Module, model_name: str = 'model', device: str = 'cp
     record = profiler.run(image)
     return record.to_dataframe()
 
-def plot_line(df, model_name, scale: float = 1.8):
+def plot_line(df, model_name, scale: float = 1.9):
     fig, ax = plt.subplots()
     df.plot.line(y='time', ax=ax, figsize=(12, 5), marker='o', markersize=5)
     plt.legend(loc='upper left')
