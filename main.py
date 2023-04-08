@@ -4,10 +4,13 @@ from profiler import Profiler
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from hook import *
+
 def profile(model: torch.nn.Module, model_name: str = 'model', device: str = 'cpu') -> pd.DataFrame:
     model = model.eval().to(device)  # load model
     image = torch.rand(1, 3, 640, 640).to(device)  # load image
-    profiler = Profiler(model, model_name)
+    hook = TimeHook()
+    profiler = Profiler(model, model_name, hook)
     record = profiler.run(image)
     return record.to_dataframe()
 
@@ -98,8 +101,8 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 #generate all the plots
 print("Generating line plots...")
 generate_line_plots(models, models_names, device)
-print("Generating stacked bar plot...")
-generate_stacked_bar_plot(models, models_names, selected_layers, device)
-print("Generating bar plots...")
-generate_bar_plot(models, models_names, device)
+# print("Generating stacked bar plot...")
+# generate_stacked_bar_plot(models, models_names, selected_layers, device)
+# print("Generating bar plots...")
+# generate_bar_plot(models, models_names, device)
 
