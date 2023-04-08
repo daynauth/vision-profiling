@@ -94,16 +94,22 @@ def generate_bar_plot(models, models_names, device):
         df.rename(columns={'index': 'layer_type'}, inplace=True)
         plot_bar(df, model_name)
 
-models = [YoloV4(), YoloX(), FasterRCNN(), YoloR()]
-models_names = ['yolov4', 'yolox', 'faster_rcnn', 'yolor']
-selected_layers = (torch.nn.Conv2d, torch.nn.Linear)
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
+def all_time_plots():
+    models = [YoloV4(), YoloX(), FasterRCNN(), YoloR()]
+    models_names = ['yolov4', 'yolox', 'faster_rcnn', 'yolor']
+    selected_layers = (torch.nn.Conv2d, torch.nn.Linear)
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-#generate all the plots
-print("Generating line plots...")
-generate_line_plots(models, models_names, device)
-# print("Generating stacked bar plot...")
-# generate_stacked_bar_plot(models, models_names, selected_layers, device)
-# print("Generating bar plots...")
-# generate_bar_plot(models, models_names, device)
+    #generate all the plots
+    print("Generating line plots...")
+    generate_line_plots(models, models_names, device)
+    print("Generating stacked bar plot...")
+    generate_stacked_bar_plot(models, models_names, selected_layers, device)
+    print("Generating bar plots...")
+    generate_bar_plot(models, models_names, device)
 
+def main():
+    all_time_plots()
+
+if __name__ == '__main__':
+    main()

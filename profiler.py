@@ -36,16 +36,18 @@ class Profiler:
         map(lambda hook: hook.remove(), self.pre_hooks)
         map(lambda hook: hook.remove(), self.post_hooks)
 
-    def run(self, image: torch.Tensor, warmup_steps:int = 1) -> TimeRecord:
+    def run(self, image: torch.Tensor, warmup_steps:int = 1) -> Record:
         #warm up
-        for _ in range(warmup_steps):
-            self.model(image)
-
+        self._warmup(image, warmup_steps)
         self.attach_hooks(self.model, self.name)
         self._infer(image)
         self.detach_hooks()
 
         return self.hook.record
+    
+    def _warmup(self,image: torch.Tensor, warmup_steps:int = 1) -> None:
+        for _ in range(warmup_steps):
+            self.model(image)
     
     def _infer(self, image: torch.Tensor) -> torch.Tensor:
         with torch.no_grad(): 
