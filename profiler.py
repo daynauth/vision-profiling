@@ -9,8 +9,6 @@ class Profiler:
         self.name = name
         self.layers = layers
         self.all_layers = False
-
-        self.starter, self.ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
         
         if self.layers is None:
             self.all_layers = True
@@ -35,23 +33,23 @@ class Profiler:
         self.post_hooks.append(model.register_forward_hook(self.hook.post(name)))
         
     def detach_hooks(self) -> None:
-        for hook in self.pre_hooks:
-            hook.remove()
-        for hook in self.post_hooks:
-            hook.remove()
+        map(lambda hook: hook.remove(), self.pre_hooks)
+        map(lambda hook: hook.remove(), self.post_hooks)
 
-    def run(self, image: torch.Tensor) -> Record:
+    def run(self, image: torch.Tensor, warmup_steps:int = 1) -> TimeRecord:
         #warm up
-        self.model(image)
-
-        self.attach_hooks(self.model, self.name)
-
-        with torch.no_grad():
+        for _ in range(warmup_steps):
             self.model(image)
 
+        self.attach_hooks(self.model, self.name)
+        self._infer(image)
         self.detach_hooks()
 
         return self.hook.record
+    
+    def _infer(self, image: torch.Tensor) -> torch.Tensor:
+        with torch.no_grad(): 
+            self.model(image)
 
 
 

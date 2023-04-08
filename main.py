@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from hook import *
+from record import *
 
 def profile(model: torch.nn.Module, model_name: str = 'model', device: str = 'cpu') -> pd.DataFrame:
     model = model.eval().to(device)  # load model
