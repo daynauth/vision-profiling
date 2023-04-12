@@ -1,5 +1,5 @@
 import torch
-from detect import YoloV4, YoloX, FasterRCNN, YoloR
+from detect import YoloV4, YoloX, FasterRCNN, YoloR, YoloS
 from profiler import Profiler
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -95,8 +95,8 @@ def generate_bar_plot(models, models_names, device):
         plot_bar(df, model_name)
 
 def all_time_plots():
-    models = [YoloV4(), YoloX(), FasterRCNN(), YoloR()]
-    models_names = ['yolov4', 'yolox', 'faster_rcnn', 'yolor']
+    models = [YoloV4(), YoloX(), FasterRCNN(), YoloR(), YoloS()] #not efficient, but it's just a test, PLEASE FIX
+    models_names = ['yolov4', 'yolox', 'faster_rcnn', 'yolor', 'yolos']
     selected_layers = (torch.nn.Conv2d, torch.nn.Linear)
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
@@ -108,8 +108,39 @@ def all_time_plots():
     print("Generating bar plots...")
     generate_bar_plot(models, models_names, device)
 
-def main():
-    all_time_plots()
+def test():
+    model = YoloS()
+    name = 'yolos'
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+    df = profile(model, name, device)
+    plot_line(df, name)
+
+    # model = FasterRCNN()
+    # model_name = 'faster_rcnn'
+    # device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    # model = model.eval().to(device)  # load model
+
+    # image = torch.rand(1, 3, 640, 640).to(device)  # load image
+
+    # hook = MemoryHook()
+
+    # profiler = Profiler(model, model_name, hook)
+    # records = profiler.run(image)
+    
+    # #write all record to file
+    # with open('memory.txt', 'w') as f:
+    #     for record in records:
+    #         f.write(str(record) + '\n')
+
+    # df = record.to_dataframe()
+    # print(df.head())
+
+def main(start_test: bool = False):
+    if start_test:
+        test()
+    else:
+        all_time_plots()
 
 if __name__ == '__main__':
-    main()
+    main(start_test = False)
