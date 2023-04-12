@@ -29,3 +29,12 @@ class TimeRecord(ABC):
         df.reset_index(inplace=True)
         df.rename(columns={'index': 'layer_name'}, inplace=True)
         return df
+    
+class MemoryRecord(Record):
+    def __init__(self) -> None:
+        self.data = {}
+
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        df = pd.DataFrame.from_dict(self.data, orient='index')
+        return df
