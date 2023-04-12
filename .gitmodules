@@ -7,3 +7,6 @@
 [submodule "detect/yolov4"]
 	path = detect/yolov4
 	url = https://github.com/Tianxiaomo/pytorch-YOLOv4
+[submodule "detect/yolos"]
+	path = detect/yolos
+	url = https://github.com/hustvl/YOLOS
