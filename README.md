@@ -22,6 +22,9 @@
 ### YoloR
 ![YoloR](images/layer_time_yolor.png)
 
+### YoloS 
+![YoloS](images/layer_time_yolos.png)
+
 ## Model Layer Comparison
 ### Faster RCNN
 ![Faster RCNN](images/layer_time_bar_faster_rcnn.png)
@@ -34,6 +37,9 @@
 
 ### YoloR
 ![YoloR](images/layer_time_bar_yolor.png)
+
+### YoloS
+![YoloS](images/layer_time_bar_yolos.png)
 
 ## Model Comparison
 ![Model_Comparison](images/layer_time_stacked_bar.png)
