@@ -1,7 +1,14 @@
 import torch
-import pandas as pd
 
 from hook import *
+
+def walk_layers(model: torch.nn.Module, name:str, action: callable) -> None:
+    if len(list(model.named_children())) == 0:
+        action(model, name)
+        return
+    
+    for n, m in model.named_children():
+        walk_layers(m, name + "." + n, action)
 
 class Profiler:
     def __init__(self, model: torch.nn.Module, name: str, hook: Hook, layers:tuple = None) -> None:

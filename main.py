@@ -52,6 +52,10 @@ def group_layers(model_name, df, selected_layers):
         
     df2 = df2.groupby('layer_type').sum()
     df2['model_name'] = model_name
+
+    #divide time by total time
+    df2['time'] = df2['time'] / df2['time'].sum() * 100
+
     df2.reset_index(inplace=True)
     return df2
 
@@ -71,10 +75,15 @@ def generate_stacked_bar_plot(models, models_names, selected_layers, device):
     dfs = pd.concat(dfs)
     dfs.reset_index(inplace=True, drop=True)
     dfs = dfs.pivot(index='model_name', columns='layer_type', values='time')
+    print(dfs)
+    dfs = dfs.reindex(['yolov4', 'yolox', 'faster_rcnn', 'yolor', 'yolos'])
+    print(dfs)
     dfs.plot.bar(stacked=True, figsize=(12, 5))
-    plt.ylabel('time (ms)')
+    plt.ylabel('time (%)')
     plt.xlabel('models')
     plt.xticks(rotation=0, ha='center')
+    #set legend outside
+    plt.legend(bbox_to_anchor=(1.01, 1), loc='upper left', borderaxespad=0.)
     plt.savefig('images/layer_time_stacked_bar.png')
 
 
@@ -101,40 +110,42 @@ def all_time_plots():
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     #generate all the plots
-    print("Generating line plots...")
-    generate_line_plots(models, models_names, device)
+    # print("Generating line plots...")
+    # generate_line_plots(models, models_names, device)
     print("Generating stacked bar plot...")
     generate_stacked_bar_plot(models, models_names, selected_layers, device)
-    print("Generating bar plots...")
-    generate_bar_plot(models, models_names, device)
+    # print("Generating bar plots...")
+    # generate_bar_plot(models, models_names, device)
+
+def plot_memory_usage(model, model_name, device):
+    model = model.eval().to(device)  # load model
+
+    image = torch.rand(1, 3, 640, 640).to(device)  # load image
+
+    hook = MemoryHook()
+
+    profiler = Profiler(model, model_name, hook)
+    records = profiler.run(image)
+    
+    df = pd.DataFrame(records, columns=["Memory Usage (MB)"])
+    df["Memory Usage (MB)"] = df["Memory Usage (MB)"].div(1024*1024)
+    
+    #plot bar chart
+    df.plot.bar(figsize=(15, 8))
+    plt.ylabel('Memory Usage (MB)')
+    plt.xlabel('layers')
+    plt.xticks(rotation=75, ha='right')
+    plt.savefig(f'images/memory_usage_{model_name}.png')
 
 def test():
-    model = YoloS()
-    name = 'yolos'
+    models = [YoloV4(), YoloX(), FasterRCNN(), YoloR(), YoloS()] #not efficient, but it's just a test, PLEASE FIX
+    models_names = ['yolov4', 'yolox', 'faster_rcnn', 'yolor', 'yolos']
+    selected_layers = (torch.nn.Conv2d, torch.nn.Linear)
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    df = profile(model, name, device)
-    plot_line(df, name)
+    for model, model_name in zip(models, models_names):
+        plot_memory_usage(model, model_name, device)
 
-    # model = FasterRCNN()
-    # model_name = 'faster_rcnn'
-    # device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    # model = model.eval().to(device)  # load model
-
-    # image = torch.rand(1, 3, 640, 640).to(device)  # load image
-
-    # hook = MemoryHook()
-
-    # profiler = Profiler(model, model_name, hook)
-    # records = profiler.run(image)
-    
-    # #write all record to file
-    # with open('memory.txt', 'w') as f:
-    #     for record in records:
-    #         f.write(str(record) + '\n')
-
-    # df = record.to_dataframe()
-    # print(df.head())
 
 def main(start_test: bool = False):
     if start_test:
@@ -143,4 +154,4 @@ def main(start_test: bool = False):
         all_time_plots()
 
 if __name__ == '__main__':
-    main(start_test = False)
+    main(start_test = True)
