@@ -1,7 +1,7 @@
 import torch
 import pandas as pd
 
-from detect import YoloV4, YoloX, FasterRCNN, YoloR, YoloS
+from detect import YoloS
 from profiler import Profiler
 from hook import TraceHook, ProfHook
 
