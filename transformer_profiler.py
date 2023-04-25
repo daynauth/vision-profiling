@@ -93,6 +93,8 @@ def yolos_profiler(hook, filename="prof.csv", tag = False):
 
     with torch.no_grad():
         model(image)
+        model(image)
+
 
 
     hook._record.append({"layer_name" : "output", "time" : 0, "cpu_mem" : 0, "cuda_mem": 0, "size" : 0,  "MACs": 0})
@@ -104,7 +106,7 @@ def yolos_profiler(hook, filename="prof.csv", tag = False):
     df = pd.DataFrame(hook.record)
     df.to_csv(filename, index=False)
 
-    #print(model)
+    print(model.embeddings.patch_embeddings)
 
     max_mem = torch.cuda.max_memory_allocated()
     print(f"max memory usage: {max_mem/1024/1024}MB")
