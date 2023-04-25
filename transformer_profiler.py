@@ -45,12 +45,25 @@ def yolos_profiler(hook, filename="prof.csv", tag = False):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = model.to(device)
-    image = torch.rand(1, 3, 640, 640).to(device)
     
+    image = torch.rand(1, 3, 640, 640).to(device)   
+
+    memory = torch.cuda.memory_allocated()
+    print(f"memory usage: {memory/1024/1024}MB")
+
+    
+
     if tag:
         image.__tag__ = "input"
 
-    model(image)
+
+    for _ in range(10):
+        model(image) 
+
+    '''
+    - confirm the model memory usage
+    - 
+    '''
 
     image_size = image.numel() * 4 / 1024 / 1024
     hook._record.append({"layer_name" : "input", "time" : 0, "cpu_mem" : 0, "cuda_mem": 0, "size" : image_size,  "MACs": 0})
@@ -81,6 +94,7 @@ def yolos_profiler(hook, filename="prof.csv", tag = False):
     with torch.no_grad():
         model(image)
 
+
     hook._record.append({"layer_name" : "output", "time" : 0, "cpu_mem" : 0, "cuda_mem": 0, "size" : 0,  "MACs": 0})
 
     for h in hooks:
@@ -90,6 +104,9 @@ def yolos_profiler(hook, filename="prof.csv", tag = False):
     df = pd.DataFrame(hook.record)
     df.to_csv(filename, index=False)
 
-    print(model)
+    #print(model)
+
+    max_mem = torch.cuda.max_memory_allocated()
+    print(f"max memory usage: {max_mem/1024/1024}MB")
 
 yolos_profiler(ProfHook(), "prof.csv")
