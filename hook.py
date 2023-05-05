@@ -131,9 +131,9 @@ class ProfHook(Hook):
         return self._record
     
 
+    #entry point to the layer
     def pre(self, name: str) -> callable:
         def hook(module, input):
-            torch.cuda.reset_max_memory_allocated()
             self.starter.record()
             self.prof.__enter__()
             self.ref = record_function(name)
@@ -143,6 +143,7 @@ class ProfHook(Hook):
     def add_record(self, name: str):
         self._record.append({"layer_name" : name, "time" : 0, "cpu_mem" : 0, "cuda_mem": 0, "size" : 0,  "MACs": 0})
 
+    #exit point to the layer
     def post(self, name: str) -> callable:
         def hook(module, input, output):
             self.ender.record()
@@ -154,7 +155,9 @@ class ProfHook(Hook):
  
             events = self.prof.key_averages()
 
-            #print(self.prof.key_averages().table(sort_by="cuda_time_total"))
+            #print(self.prof)
+
+            #print(events.table(sort_by="cuda_time_total"))
 
             cuda_mem = 0
             cpu_mem = 0
@@ -163,10 +166,7 @@ class ProfHook(Hook):
                     cuda_mem = event.cuda_memory_usage * 1.0 / 1024 / 1024
                     cpu_mem = event.cpu_memory_usage * 1.0 / 1024 / 1024
                     self_cuda_mem = abs(event.self_cuda_memory_usage * 1.0 / 1024 / 1024)
-
-                    # print(f"Cuda Memory : {cuda_mem}MB")
-                    # print(f"Self Cuda Memory : {self_cuda_mem}MB")
-
+                    self_cuda_mem = max(self_cuda_mem, cuda_mem)
                     break
 
             size = 0
@@ -176,10 +176,10 @@ class ProfHook(Hook):
             #print(module.weight.shape)
             
 
-            memory = torch.cuda.memory_allocated()
+            #memory = torch.cuda.memory_allocated()
             # print(f"{name} : {memory/1024/1024}MB")
 
-            max_memory = torch.cuda.max_memory_allocated()
+            #max_memory = torch.cuda.max_memory_allocated()
             # print(f"{name} : max memory - {max_memory/1024/1024}MB") 
             
             
@@ -190,8 +190,9 @@ class ProfHook(Hook):
                 if len(output) == 1:
                     size = output[0].numel() * output[0].element_size() / 1024 / 1024
 
-            #self._record.append({"layer_name" : name, "time" : end_time, "cpu_mem" : cpu_mem, "cuda_mem": self_cuda_mem, "size" :  size, "MACs": 0})
-            self._record.append({"layer_name" : name, "cpu_mem" : cpu_mem, "cuda_mem": self_cuda_mem, "size" :  size, "MACs": 0})
+            # print(name)
+            self._record.append({"layer_name" : name, "time" : end_time, "cpu_mem" : cpu_mem, "cuda_mem": self_cuda_mem, "size" :  size, "MACs": 0})
+            #self._record.append({"layer_name" : name, "cpu_mem" : cpu_mem, "cuda_mem": self_cuda_mem, "size" :  size, "MACs": 0})
 
 
 
