@@ -1,6 +1,6 @@
 src,dst
-Input,Embeddings
-Input,Interpolation
+input,Embeddings
+input,Interpolation
 Embeddings,layer_0
 Interpolation,layer_1
 Interpolation,layer_2
@@ -27,5 +27,5 @@ layer_10,layer_11
 layer_11,Layer_Norm
 Layer_Norm,Class_Labels_Classifier
 Layer_Norm,Box_Predictor
-Class_Labels_Classifier,Output
-Box_Predictor,Output,Output
+Class_Labels_Classifier,output
+Box_Predictor,output
