@@ -13,6 +13,7 @@ from PIL import Image
 from typing import Optional, Tuple, Union, List, Dict
 from dataclasses import dataclass
 import math
+import time
 
 import nvtx
 
@@ -803,7 +804,11 @@ def test():
 
     with torch.no_grad():
         model(inputs)
+
+        start_time = time.time()
         model(inputs)
+        end_time = time.time()
+        print(f"Time taken: {end_time - start_time}")
 
     # target_sizes = torch.tensor([image.size[::-1]])
     # results = image_processor.post_process_object_detection(outputs, threshold=0.9, target_sizes=target_sizes)[
