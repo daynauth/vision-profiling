@@ -160,7 +160,7 @@ class YolosSelfAttention(nn.Module):
         self.query = nn.Linear(config.hidden_size, self.all_head_size, bias=config.qkv_bias)
         self.key = nn.Linear(config.hidden_size, self.all_head_size, bias=config.qkv_bias)
         self.value = nn.Linear(config.hidden_size, self.all_head_size, bias=config.qkv_bias)
-
+        
         self.dropout = nn.Dropout(config.attention_probs_dropout_prob)
 
     def transpose_for_scores(self, x: torch.Tensor) -> torch.Tensor:
@@ -304,7 +304,7 @@ class YolosOutput(nn.Module):
 class YolosLayer(nn.Module):
     """This corresponds to the Block class in the timm implementation."""
 
-    def __init__(self, config) -> None:
+    def __init__(self, config, layer_index:str ) -> None:
         super().__init__()
         self.chunk_size_feed_forward = config.chunk_size_feed_forward
         self.seq_len_dim = 1
@@ -313,6 +313,9 @@ class YolosLayer(nn.Module):
         self.output = YolosOutput(config)
         self.layernorm_before = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
         self.layernorm_after = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        self.starter, self.ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+        self.layer_name = "layer_" + layer_index
+
     @nvtx.annotate("Attention Head Calculation", color="red")
     def forward(
         self,
@@ -321,30 +324,62 @@ class YolosLayer(nn.Module):
         output_attentions: bool = False,
     ) -> Union[Tuple[torch.Tensor, torch.Tensor], Tuple[torch.Tensor]]:
         
+        self.starter.record()
+        hidden_states = self.layernorm_before(hidden_states)# in Yolos, layernorm is applied before self-attention
+        self.ender.record()
+        torch.cuda.synchronize()
+        end_time = self.starter.elapsed_time(self.ender)
+        print(f"{self.layer_name}.Layer_Norm_Before, {end_time},0,1130,0,0")
+
         with nvtx.annotate("Self Attention Forward", color="purple"):
+            self.starter.record()
             self_attention_outputs = self.attention(
-                self.layernorm_before(hidden_states),  # in Yolos, layernorm is applied before self-attention
+                hidden_states,  
                 head_mask,
                 output_attentions=output_attentions,
             )
+            self.ender.record()
+            torch.cuda.synchronize()
+            end_time = self.starter.elapsed_time(self.ender)
+            print(f"{self.layer_name}.Self_Attention_Forward, {end_time},0,1140,0,0")
 
         attention_output = self_attention_outputs[0]
         outputs = self_attention_outputs[1:]  # add self attentions if we output attention weights
 
         # first residual connection
         with nvtx.annotate("Residual Connection 1", color="red"):
+            self.starter.record()
             hidden_states = attention_output + hidden_states
+            self.ender.record()
+            torch.cuda.synchronize()
+            end_time = self.starter.elapsed_time(self.ender)
+            print(f"{self.layer_name}.Residual_Connection_1, {end_time},0,1130,0,0")
 
         # in Yolos, layernorm is also applied after self-attention
         with nvtx.annotate("Layer Norm After", color="purple"):
+            self.starter.record()
             layer_output = self.layernorm_after(hidden_states)
+            self.ender.record()
+            torch.cuda.synchronize()
+            end_time = self.starter.elapsed_time(self.ender)
+            print(f"{self.layer_name}.Layer_Norm_After, {end_time},0,1130,0,0")
 
         with nvtx.annotate("Intermediate Forward", color="green"):
+            self.starter.record()
             layer_output = self.intermediate(layer_output)
+            self.ender.record()
+            torch.cuda.synchronize()
+            end_time = self.starter.elapsed_time(self.ender)
+            print(f"{self.layer_name}.Intermediate_Forward, {end_time},0,1130,0,0")
 
         # second residual connection is done here
         with nvtx.annotate("Residual Connection 2", color="red"):
+            self.starter.record()
             layer_output = self.output(layer_output, hidden_states)
+            self.ender.record()
+            torch.cuda.synchronize()
+            end_time = self.starter.elapsed_time(self.ender)
+            print(f"{self.layer_name}.Output, {end_time},0,1130,0,0")
 
         outputs = (layer_output,) + outputs
 
@@ -387,7 +422,7 @@ class YolosEncoder(nn.Module):
     def __init__(self, config) -> None:
         super().__init__()
         self.config = config
-        self.layer = nn.ModuleList([YolosLayer(config) for _ in range(config.num_hidden_layers)])
+        self.layer = nn.ModuleList([YolosLayer(config, str(i)) for i in range(config.num_hidden_layers)])
 
         self.gradient_checkpointing = False
 
