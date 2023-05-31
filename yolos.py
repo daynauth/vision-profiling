@@ -449,7 +449,7 @@ class YolosAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             attention_output_size = attention_output.element_size() * attention_output.nelement() / 1024 / 1024
-            print(f"{self.layer_name}.Self_Attention_Output, {end_time/1000},0,-1,{attention_output_size},0")
+            print(f"{self.layer_name}.Self_Attention_Output, {end_time/1000},0,{attention_memory[self.layer_name]['Self_Attention_Output']},{attention_output_size},0")
 
         outputs = (attention_output,) + self_outputs[1:]  # add attentions if we output them
         return outputs
