@@ -19,6 +19,7 @@ import nvtx
 
 attention_memory = {
     "layer_0": {
+        "mid_position_embedding": 0,
         "query": 30,
         "key": 20,
         "value": 0,
@@ -30,6 +31,7 @@ attention_memory = {
         "Self_Attention_Output": (1910 - 1910)
     },
         "layer_1": {
+        "mid_position_embedding": 0,
         "query": (2000 - 2000),
         "key": (2000 - 2000),
         "value": (2000 - 2000),
@@ -41,6 +43,7 @@ attention_memory = {
         "Self_Attention_Output": (3040 - 3040)
     },
         "layer_2": {
+        "mid_position_embedding": 0,
         "query": 0,
         "key": 0,
         "value": 0,
@@ -52,6 +55,7 @@ attention_memory = {
         "Self_Attention_Output": 0
     },
         "layer_3": {
+        "mid_position_embedding": 0,
         "query": 0,
         "key": 0,
         "value": 0,
@@ -63,6 +67,7 @@ attention_memory = {
         "Self_Attention_Output": 0
     },
         "layer_4": {
+        "mid_position_embedding": 0,
         "query": 0,
         "key": 0,
         "value": 0,
@@ -74,6 +79,7 @@ attention_memory = {
         "Self_Attention_Output": 0
     },
         "layer_5": {
+        "mid_position_embedding": 0,
         "query": 0,
         "key": 0,
         "value": 0,
@@ -85,6 +91,7 @@ attention_memory = {
         "Self_Attention_Output": 0
     },
         "layer_6": {
+        "mid_position_embedding": 0,
         "query": 0,
         "key": 0,
         "value": 0,
@@ -96,61 +103,65 @@ attention_memory = {
         "Self_Attention_Output": 0
     },
         "layer_7": {
-        "query": 0,
-        "key": 0,
-        "value": 0,
-        "mul": 520,
-        "div": 520,
-        "softmax": 0,
-        "dropout": 0,
-        "context": 0,
-        "Self_Attention_Output": 0
+            "mid_position_embedding": 0,
+            "query": 0,
+            "key": 0,
+            "value": 0,
+            "mul": 520,
+            "div": 520,
+            "softmax": 0,
+            "dropout": 0,
+            "context": 0,
+            "Self_Attention_Output": 0
     },
         "layer_8": {
-        "query": 0,
-        "key": 0,
-        "value": 0,
-        "mul": 520,
-        "div": 520,
-        "softmax": 0,
-        "dropout": 0,
-        "context": 0,
-        "Self_Attention_Output": 0
-    },
+            "mid_position_embedding": 0,
+            "query": 0,
+            "key": 0,
+            "value": 0,
+            "mul": 520,
+            "div": 520,
+            "softmax": 0,
+            "dropout": 0,
+            "context": 0,
+            "Self_Attention_Output": 0
+        },
         "layer_9": {
-        "query": 0,
-        "key": 0,
-        "value": 0,
-        "mul": 520,
-        "div": 520,
-        "softmax": 0,
-        "dropout": 0,
-        "context": 0,
-        "Self_Attention_Output": 0
-    },
+            "mid_position_embedding": 0,
+            "query": 0,
+            "key": 0,
+            "value": 0,
+            "mul": 520,
+            "div": 520,
+            "softmax": 0,
+            "dropout": 0,
+            "context": 0,
+            "Self_Attention_Output": 0
+        },
         "layer_10": {
-        "query": 0,
-        "key": 0,
-        "value": 0,
-        "mul": 520,
-        "div": 520,
-        "softmax": 0,
-        "dropout": 0,
-        "context": 0,
-        "Self_Attention_Output": 0
-    },
+            "mid_position_embedding": 0,
+            "query": 0,
+            "key": 0,
+            "value": 0,
+            "mul": 520,
+            "div": 520,
+            "softmax": 0,
+            "dropout": 0,
+            "context": 0,
+            "Self_Attention_Output": 0
+        },
         "layer_11": {
-        "query": 0,
-        "key": 0,
-        "value": 0,
-        "mul": 520,
-        "div": 520,
-        "softmax": 0,
-        "dropout": 0,
-        "context": 0,
-        "Self_Attention_Output": 0
-    },
-
+            "mid_position_embedding": 0,
+            "query": 0,
+            "key": 0,
+            "value": 0,
+            "mul": 520,
+            "div": 520,
+            "softmax": 0,
+            "dropout": 0,
+            "context": 0,
+            "Self_Attention_Output": 0
+        },
 }
 
 
@@ -526,17 +537,17 @@ class YolosLayer(nn.Module):
         
         with nvtx.annotate(f"{self.layer_name}_Layer_Norm_Before", color="purple"):
             self.starter.record()
-            hidden_states = self.layernorm_before(hidden_states)# in Yolos, layernorm is applied before self-attention
+            norm_output = self.layernorm_before(hidden_states)# in Yolos, layernorm is applied before self-attention
             self.ender.record()
             torch.cuda.synchronize()
             end_time = self.starter.elapsed_time(self.ender)
-            hidden_states_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_Layer_Norm_Before, {end_time/1000},0,0,{hidden_states_size},0")
+            norm_output_size = norm_output.element_size() * norm_output.nelement() / 1024 / 1024
+            print(f"{self.layer_name}_Layer_Norm_Before, {end_time/1000},0,0,{norm_output_size},0")
 
         with nvtx.annotate(f"{self.layer_name}_Self_Attention_Forward", color="purple"):
             self.starter.record()
             self_attention_outputs = self.attention(
-                hidden_states,  
+                norm_output,  
                 head_mask,
                 output_attentions=output_attentions,
             )
@@ -594,8 +605,9 @@ class YolosLayer(nn.Module):
 
 
 class InterpolateMidPositionEmbeddings(nn.Module):
-    def __init__(self, config) -> None:
+    def __init__(self, config, split = True) -> None:
         super().__init__()
+        self.split = split
         self.config = config
 
     def forward(self, pos_embed, img_size=(800, 1344)) -> torch.Tensor:
@@ -626,9 +638,10 @@ class InterpolateMidPositionEmbeddings(nn.Module):
         return scale_pos_embed
     
 class YolosEncoder(nn.Module):
-    def __init__(self, config) -> None:
+    def __init__(self, config, split = True) -> None:
         super().__init__()
         self.config = config
+        self.split = split
         self.layer = nn.ModuleList([YolosLayer(config, str(i)) for i in range(config.num_hidden_layers)])
 
         self.gradient_checkpointing = False
@@ -648,6 +661,8 @@ class YolosEncoder(nn.Module):
             if config.use_mid_position_embeddings
             else None
         )
+
+        print(self.mid_position_embeddings.shape)
 
         self.interpolation = InterpolateMidPositionEmbeddings(config) if config.use_mid_position_embeddings else None
 
@@ -669,14 +684,14 @@ class YolosEncoder(nn.Module):
 
         self.starter.record()
         with nvtx.annotate("Mid Position Embedding", color="purple"):
-            if self.config.use_mid_position_embeddings:
+            if self.config.use_mid_position_embeddings and not self.split:
                 interpolated_mid_position_embeddings = self.interpolation(self.mid_position_embeddings, (height, width))
 
-        self.ender.record()
-        torch.cuda.synchronize()
-        end_time = self.starter.elapsed_time(self.ender)
-        interpolated_mid_position_embeddings_size = interpolated_mid_position_embeddings.element_size() * interpolated_mid_position_embeddings.nelement() / 1024 / 1024
-        print(f"Interpolation, {end_time/1000},0,218,{interpolated_mid_position_embeddings_size},0")
+                self.ender.record()
+                torch.cuda.synchronize()
+                end_time = self.starter.elapsed_time(self.ender)
+                interpolated_mid_position_embeddings_size = interpolated_mid_position_embeddings.element_size() * interpolated_mid_position_embeddings.nelement() / 1024 / 1024
+                print(f"Interpolation, {end_time/1000},0,218,{interpolated_mid_position_embeddings_size},0")
         memory = [
             1782,
             1120,
@@ -716,21 +731,42 @@ class YolosEncoder(nn.Module):
                 )
             else:
                 layer_outputs = layer_module(hidden_states, layer_head_mask, output_attentions)
-                #torch.cuda.synchronize()
-
+                torch.cuda.synchronize()
+                nvtx.end_range(rng)
 
             hidden_states = layer_outputs[0]
+           
+            if self.config.use_mid_position_embeddings:
+                if i < (self.config.num_hidden_layers - 1):
+                    if self.split:
+                        with nvtx.annotate(f"layer_{i}_mid_position_embedding", color="purple"):
+                            self.starter.record()
+                            interpolated_mid_position_embedding = self.interpolation(self.mid_position_embeddings[i].unsqueeze(0), (height, width))
+                            self.ender.record()
+                            torch.cuda.synchronize()
+                            end_time = self.starter.elapsed_time(self.ender)
+                            interpolated_mid_position_embedding_size = interpolated_mid_position_embedding.element_size() * interpolated_mid_position_embedding.nelement() / 1024 / 1024
+                            layer = f"layer_{i}"
+                            print(f"layer_{i}_mid_position_embedding, {end_time/1000},0,{attention_memory[layer]['mid_position_embedding']},{interpolated_mid_position_embedding_size},0")
 
-            with nvtx.annotate(f"layer_{i}.add_mid_position_embedding", color="purple"):
-                if self.config.use_mid_position_embeddings:
-                    if i < (self.config.num_hidden_layers - 1):
-                        self.starter.record()
-                        hidden_states = hidden_states + interpolated_mid_position_embeddings[i]
-                        self.ender.record()
-                        torch.cuda.synchronize()
-                        end_time = self.starter.elapsed_time(self.ender)
-                        hidden_states_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
-                        print(f"layer_{i}.add_mid_position_embedding, {end_time/1000},0,{memory[i]},{hidden_states_size},0")
+
+                        with nvtx.annotate(f"layer_{i}_add_mid_position_embedding", color="purple"):
+                            self.starter.record()
+                            hidden_states = hidden_states + interpolated_mid_position_embedding[0]
+                            self.ender.record()
+                            torch.cuda.synchronize()
+                            end_time = self.starter.elapsed_time(self.ender)
+                            hidden_states_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
+                            print(f"layer_{i}_add_mid_position_embedding, {end_time/1000},0,{memory[i]},{hidden_states_size},0")
+                    else:
+                        with nvtx.annotate(f"layer_{i}_add_mid_position_embedding", color="purple"):
+                            self.starter.record()
+                            hidden_states = hidden_states + interpolated_mid_position_embeddings[i]
+                            self.ender.record()
+                            torch.cuda.synchronize()
+                            end_time = self.starter.elapsed_time(self.ender)
+                            hidden_states_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
+                            print(f"layer_{i}_add_mid_position_embedding, {end_time/1000},0,{memory[i]},{hidden_states_size},0")
 
             if output_attentions:
                 all_self_attentions = all_self_attentions + (layer_outputs[1],)
@@ -740,7 +776,7 @@ class YolosEncoder(nn.Module):
             end_time = self.starter.elapsed_time(self.ender)
             #layer_output_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
             #print(f"layer_{i}, {end_time/1000},0,{memory[i]},{layer_output_size},0")
-            nvtx.end_range(rng)
+            
 
         if output_hidden_states:
             all_hidden_states = all_hidden_states + (hidden_states,)
@@ -1009,25 +1045,7 @@ class YolosForObjectDetection(YolosPreTrainedModel):
             attentions=outputs.attentions,
         )
 
-def get_mem():
-    mem = torch.cuda.memory_allocated() / 1024 / 1024
-    print(f"Memory allocated: {mem} MB")
 
-def get_cache():
-    cache_size = torch.cuda.memory_reserved() / 1024 / 1024
-    print(f"Cache size: {cache_size} MB")
-
-def show_mem(message: str = ""):
-    if message != "":
-        print(f"--------- START {message}-----------")
-    else:
-        print("--------------------")
-
-    get_mem()
-    get_cache()
-
-    if message != "":
-        print(f"--------- END {message}-----------")
 
 def test():
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -1055,7 +1073,7 @@ def test():
         model(inputs)
 
         start_time = time.time()
-        model(inputs)
+        outputs = model(inputs)
         end_time = time.time()
         print(f"Time taken: {end_time - start_time}")
 
@@ -1063,6 +1081,8 @@ def test():
     # results = image_processor.post_process_object_detection(outputs, threshold=0.9, target_sizes=target_sizes)[
     #     0
     # ]
+
+
 
     # for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
     #     box = [round(i, 2) for i in box.tolist()]
@@ -1074,39 +1094,7 @@ def test():
     #print(model)
 
 
-def profile():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    image = Image.open("000000039769.jpg")
-    print("Image size", image.size)
-    image_processor = AutoImageProcessor.from_pretrained("hustvl/yolos-base")
-
-    show_mem()
-
-    inputs = image_processor(images=image, return_tensors="pt")
-    inputs.to(device)
-
-    show_mem()
-
-
-    
-
-
-    show_mem()
-
-    inputs = inputs['pixel_values']
-
-
-
-    print("Image shape", inputs.shape)
-
-    model = YolosForObjectDetection(model.config).eval().to(device)
-    output = model(inputs)
-
-    show_mem("FINAL")
-
-    #print(model)
-    print(model.config)
 
 
 test()
