@@ -1,12 +1,9 @@
-from transformers import YolosConfig, YolosModel
-import torch
+from transformers import YolosModel
 
 __all__ = ['YoloS']
 
 def YoloS():
-    configuration = YolosConfig()
-    model = YolosModel(configuration)
-
+    model = YolosModel.from_pretrained("hustvl/yolos-base")
     return model
 
 
