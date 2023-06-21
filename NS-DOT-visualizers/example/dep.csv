@@ -1,0 +1,9 @@
+src,dst
+input,layer1
+layer1,layer2
+layer2,layer3
+layer2,layer4
+layer3, layer5
+layer5, layer6
+layer4,layer6
+layer6,output

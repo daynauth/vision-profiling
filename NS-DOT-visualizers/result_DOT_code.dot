@@ -1,0 +1,19 @@
+graph {
+rankdir=LR
+input[label="input\n0.0ms\n0.0MB", style=filled, fillcolor="red"]
+layer1[label="layer1\n1.0ms\n200.0MB", style=filled, fillcolor="red"]
+layer2[label="layer2\n1.0ms\n100.0MB", style=filled, fillcolor="red"]
+layer3[label="layer3\n1.0ms\n100.0MB", style=filled, fillcolor="blue"]
+layer4[label="layer4\n1.0ms\n50.0MB", style=filled, fillcolor="red"]
+layer5[label="layer5\n1.0ms\n50.0MB", style=filled, fillcolor="blue"]
+layer6[label="layer6\n1.0ms\n50.0MB", style=filled, fillcolor="red"]
+output[label="output\n0.0ms\n0.0MB", style=filled, fillcolor="blue"]
+input -- layer1[label="4.0MB"];
+layer1 -- layer2[label="2.0MB"];
+layer2 -- layer3[label="1.0MB"];
+layer2 -- layer4[label="1.0MB"];
+layer3 -- layer5[label="0.5MB"];
+layer5 -- layer6[label="0.5MB"];
+layer4 -- layer6[label="0.5MB"];
+layer6 -- output[label="0.25MB"];
+}
