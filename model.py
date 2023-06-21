@@ -15,7 +15,7 @@ def get_image():
     return inputs
 
 def test_yolos(model):
-    model = model.to("cuda")
+    
     url = "http://images.cocodataset.org/val2017/000000039769.jpg"
     image = Image.open(requests.get(url, stream=True).raw)
 
@@ -25,7 +25,35 @@ def test_yolos(model):
     inputs = image_processor(images=image, return_tensors="pt")
     inputs.to("cuda")
 
+
+    print(inputs['pixel_values'].shape)
+
+    #get size of image in MB
+    image_size = inputs['pixel_values'].element_size() * inputs['pixel_values'].nelement() / 1024 / 1024
+    print(f"Image size: {image_size} MB")
+    
+
+
+    mem = torch.cuda.memory_allocated() / 1024 / 1024
+    print(f"Memory allocated: {mem} MB")
+
+    #get cache size
+    cache_size = torch.cuda.memory_reserved() / 1024 / 1024
+    print(f"Cache size: {cache_size} MB")
+
+    print("loading model to cuda")
+    model = model.to("cuda")
+
+    mem = torch.cuda.memory_allocated() / 1024 / 1024
+    print(f"Memory allocated: {mem} MB")
+
+    cache_size = torch.cuda.memory_reserved() / 1024 / 1024
+    print(f"Cache size: {cache_size} MB")
+
     outputs = model(**inputs)
+
+
+
 
     # convert outputs (bounding boxes and class logits) to COCO API
     target_sizes = torch.tensor([image.size[::-1]])
@@ -44,9 +72,10 @@ def test_yolos(model):
 
         img.rectangle(box, outline ="green", width=3)
 
-    image.save("example.jpg")
+    #image.save("example.jpg")
 
     #print(model)
+    #print(outputs)
 
 
 
@@ -57,7 +86,7 @@ def profile_yolo(level:int = 0):
     model = model.to(device)
     image = get_image()
     image = image['pixel_values'].to(device)
-
+    #image = torch.rand(1, 3, 640, 640).to(device)
     print(image.shape)
 
     hook = ProfHook()
@@ -135,11 +164,11 @@ def profile_yolo(level:int = 0):
 
     df.loc[df.index[-1], 'layer_name'] = 'Total'
 
-    print(df)
+    #print(df)
 
     df.to_csv(f"yolos_prof_{level}.csv", index=False)
 
-
+    #print(model.config)
 
 
 
@@ -159,5 +188,5 @@ model = YoloS_Scaled()
 
 #test_yolos(model)
 
-profile_yolo(0)
-#test_yolos(model)
+#profile_yolo(0)
+test_yolos(model)
