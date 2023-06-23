@@ -760,7 +760,7 @@ class YolosEncoder(nn.Module):
                             torch.cuda.synchronize()
                             end_time = self.starter.elapsed_time(self.ender)
                             hidden_states_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
-                            print(f"layer_{i}_add_mid_position_embedding, {end_time/1000},0,{memory[i]},{hidden_states_size},0")
+                            print(f"layer_{i}_add_mid_position_embedding, {end_time/1000},0,0,{hidden_states_size},0")
                     else:
                         with nvtx.annotate(f"layer_{i}_add_mid_position_embedding", color="purple"):
                             self.starter.record()
@@ -769,7 +769,7 @@ class YolosEncoder(nn.Module):
                             torch.cuda.synchronize()
                             end_time = self.starter.elapsed_time(self.ender)
                             hidden_states_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
-                            print(f"layer_{i}_add_mid_position_embedding, {end_time/1000},0,{memory[i]},{hidden_states_size},0")
+                            print(f"layer_{i}_add_mid_position_embedding, {end_time/1000},0,0,{hidden_states_size},0")
 
             if output_attentions:
                 all_self_attentions = all_self_attentions + (layer_outputs[1],)
