@@ -329,7 +329,7 @@ class YolosSelfAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             query_layer_size = query_layer.element_size() * query_layer.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_Query, {end_time/1000},0, {attention_memory[self.layer_name]['query']},{query_layer_size},0")
+            print(f"{self.layer_name}_Query, {end_time/1000},0, {attention_memory[self.layer_name]['query'] + query_layer_size},{query_layer_size},0")
 
         with nvtx.annotate(f"{self.layer_name}_Key", color="purple"):
             self.start.record()
@@ -338,7 +338,7 @@ class YolosSelfAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             key_layer_size = key_layer.element_size() * key_layer.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_Key, {end_time/1000},0,{attention_memory[self.layer_name]['key']},{key_layer_size},0")
+            print(f"{self.layer_name}_Key, {end_time/1000},0,{attention_memory[self.layer_name]['key'] + key_layer_size},{key_layer_size},0")
 
         with nvtx.annotate(f"{self.layer_name}_Value", color="green"):
             self.start.record()
@@ -347,7 +347,7 @@ class YolosSelfAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             value_layer_size = value_layer.element_size() * value_layer.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_Value, {end_time/1000},0,{attention_memory[self.layer_name]['value']},{value_layer_size},0")
+            print(f"{self.layer_name}_Value, {end_time/1000},0,{attention_memory[self.layer_name]['value'] + value_layer_size},{value_layer_size},0")
 
 
         # Take the dot product between "query" and "key" to get the raw attention scores.
@@ -460,7 +460,7 @@ class YolosAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             attention_output_size = attention_output.element_size() * attention_output.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_Self_Attention_Output, {end_time/1000},0,{attention_memory[self.layer_name]['Self_Attention_Output']},{attention_output_size},0")
+            print(f"{self.layer_name}_Self_Attention_Output, {end_time/1000},0,{attention_memory[self.layer_name]['Self_Attention_Output'] + attention_output_size},{attention_output_size},0")
 
         outputs = (attention_output,) + self_outputs[1:]  # add attentions if we output them
         return outputs
@@ -734,7 +734,7 @@ class YolosEncoder(nn.Module):
                 layer_outputs = layer_module(hidden_states, layer_head_mask, output_attentions)
                 self.ender.record()
                 torch.cuda.synchronize()
-                print(f"layer_{i},{self.starter.elapsed_time(self.ender)/1000},0,{memory[i]},{layer_outputs[0].element_size() * layer_outputs[0].nelement() / 1024 / 1024},0")
+                #print(f"layer_{i},{self.starter.elapsed_time(self.ender)/1000},0,{memory[i]},{layer_outputs[0].element_size() * layer_outputs[0].nelement() / 1024 / 1024},0")
                 nvtx.end_range(rng)
 
             hidden_states = layer_outputs[0]
