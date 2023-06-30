@@ -796,10 +796,46 @@ class YolosEncoder(nn.Module):
                 layer_outputs = layer_module(hidden_states, layer_head_mask, output_attentions)
                 self.ender.record()
                 torch.cuda.synchronize()
-                #print(f"layer_{i},{self.starter.elapsed_time(self.ender)/1000},0,{memory[i]},{layer_outputs[0].element_size() * layer_outputs[0].nelement() / 1024 / 1024},0")
+
+                if not fine:
+                    layer_output_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
+                    query_weight_size = layer_module.attention.attention.query.weight.element_size() * layer_module.attention.attention.query.weight.nelement() / 1024 / 1024
+                    query_bias_size = layer_module.attention.attention.query.bias.element_size() * layer_module.attention.attention.query.bias.nelement() / 1024 / 1024
+                    key_weight_size = layer_module.attention.attention.key.weight.element_size() * layer_module.attention.attention.key.weight.nelement() / 1024 / 1024
+                    key_bias_size = layer_module.attention.attention.key.bias.element_size() * layer_module.attention.attention.key.bias.nelement() / 1024 / 1024
+                    value_weight_size = layer_module.attention.attention.value.weight.element_size() * layer_module.attention.attention.value.weight.nelement() / 1024 / 1024
+                    value_bias_size = layer_module.attention.attention.value.bias.element_size() * layer_module.attention.attention.value.bias.nelement() / 1024 / 1024
+                    output_dense_weight_size = layer_module.attention.output.dense.weight.element_size() * layer_module.attention.output.dense.weight.nelement() / 1024 / 1024
+                    output_dense_bias_size = layer_module.attention.output.dense.bias.element_size() * layer_module.attention.output.dense.bias.nelement() / 1024 / 1024
+                    attention_param_size = query_weight_size + query_bias_size + key_weight_size + key_bias_size + value_weight_size + value_bias_size + output_dense_weight_size + output_dense_bias_size
+
+                    intermediate_dense_weight_size = layer_module.intermediate.dense.weight.element_size() * layer_module.intermediate.dense.weight.nelement() / 1024 / 1024
+                    intermediate_dense_bias_size = layer_module.intermediate.dense.bias.element_size() * layer_module.intermediate.dense.bias.nelement() / 1024 / 1024
+                    intermediate_param_size = intermediate_dense_weight_size + intermediate_dense_bias_size
+
+                    output_dense_weight_size = layer_module.output.dense.weight.element_size() * layer_module.output.dense.weight.nelement() / 1024 / 1024
+                    output_dense_bias_size = layer_module.output.dense.bias.element_size() * layer_module.output.dense.bias.nelement() / 1024 / 1024
+                    output_param_size = output_dense_weight_size + output_dense_bias_size
+
+                    layer_norm_weight_size = layer_module.layernorm_before.weight.element_size() * layer_module.layernorm_before.weight.nelement() / 1024 / 1024
+                    layer_norm_bias_size = layer_module.layernorm_before.bias.element_size() * layer_module.layernorm_before.bias.nelement() / 1024 / 1024
+                    layer_norm_param_size = layer_norm_weight_size + layer_norm_bias_size
+
+                    layer_norm_after_weight_size = layer_module.layernorm_after.weight.element_size() * layer_module.layernorm_after.weight.nelement() / 1024 / 1024
+                    layer_norm_after_bias_size = layer_module.layernorm_after.bias.element_size() * layer_module.layernorm_after.bias.nelement() / 1024 / 1024
+                    layer_norm_after_param_size = layer_norm_after_weight_size + layer_norm_after_bias_size
+
+                    memory[i] = memory[i] + attention_param_size + intermediate_param_size + output_param_size + layer_norm_param_size + layer_norm_after_param_size
+
+                    print(f"layer_{i}, {end_time/1000},0,{memory[i]},{layer_output_size},0")
+
+
                 nvtx.end_range(rng)
 
             hidden_states = layer_outputs[0]
+
+
+
            
             if self.config.use_mid_position_embeddings:
                 if i < (self.config.num_hidden_layers - 1):
@@ -841,37 +877,37 @@ class YolosEncoder(nn.Module):
             torch.cuda.synchronize()
             end_time = self.starter.elapsed_time(self.ender)
 
-            if not fine:
-                layer_output_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
-                query_weight_size = layer_module.attention.attention.query.weight.element_size() * layer_module.attention.attention.query.weight.nelement() / 1024 / 1024
-                query_bias_size = layer_module.attention.attention.query.bias.element_size() * layer_module.attention.attention.query.bias.nelement() / 1024 / 1024
-                key_weight_size = layer_module.attention.attention.key.weight.element_size() * layer_module.attention.attention.key.weight.nelement() / 1024 / 1024
-                key_bias_size = layer_module.attention.attention.key.bias.element_size() * layer_module.attention.attention.key.bias.nelement() / 1024 / 1024
-                value_weight_size = layer_module.attention.attention.value.weight.element_size() * layer_module.attention.attention.value.weight.nelement() / 1024 / 1024
-                value_bias_size = layer_module.attention.attention.value.bias.element_size() * layer_module.attention.attention.value.bias.nelement() / 1024 / 1024
-                output_dense_weight_size = layer_module.attention.output.dense.weight.element_size() * layer_module.attention.output.dense.weight.nelement() / 1024 / 1024
-                output_dense_bias_size = layer_module.attention.output.dense.bias.element_size() * layer_module.attention.output.dense.bias.nelement() / 1024 / 1024
-                attention_param_size = query_weight_size + query_bias_size + key_weight_size + key_bias_size + value_weight_size + value_bias_size + output_dense_weight_size + output_dense_bias_size
+            # if not fine:
+            #     layer_output_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
+            #     query_weight_size = layer_module.attention.attention.query.weight.element_size() * layer_module.attention.attention.query.weight.nelement() / 1024 / 1024
+            #     query_bias_size = layer_module.attention.attention.query.bias.element_size() * layer_module.attention.attention.query.bias.nelement() / 1024 / 1024
+            #     key_weight_size = layer_module.attention.attention.key.weight.element_size() * layer_module.attention.attention.key.weight.nelement() / 1024 / 1024
+            #     key_bias_size = layer_module.attention.attention.key.bias.element_size() * layer_module.attention.attention.key.bias.nelement() / 1024 / 1024
+            #     value_weight_size = layer_module.attention.attention.value.weight.element_size() * layer_module.attention.attention.value.weight.nelement() / 1024 / 1024
+            #     value_bias_size = layer_module.attention.attention.value.bias.element_size() * layer_module.attention.attention.value.bias.nelement() / 1024 / 1024
+            #     output_dense_weight_size = layer_module.attention.output.dense.weight.element_size() * layer_module.attention.output.dense.weight.nelement() / 1024 / 1024
+            #     output_dense_bias_size = layer_module.attention.output.dense.bias.element_size() * layer_module.attention.output.dense.bias.nelement() / 1024 / 1024
+            #     attention_param_size = query_weight_size + query_bias_size + key_weight_size + key_bias_size + value_weight_size + value_bias_size + output_dense_weight_size + output_dense_bias_size
 
-                intermediate_dense_weight_size = layer_module.intermediate.dense.weight.element_size() * layer_module.intermediate.dense.weight.nelement() / 1024 / 1024
-                intermediate_dense_bias_size = layer_module.intermediate.dense.bias.element_size() * layer_module.intermediate.dense.bias.nelement() / 1024 / 1024
-                intermediate_param_size = intermediate_dense_weight_size + intermediate_dense_bias_size
+            #     intermediate_dense_weight_size = layer_module.intermediate.dense.weight.element_size() * layer_module.intermediate.dense.weight.nelement() / 1024 / 1024
+            #     intermediate_dense_bias_size = layer_module.intermediate.dense.bias.element_size() * layer_module.intermediate.dense.bias.nelement() / 1024 / 1024
+            #     intermediate_param_size = intermediate_dense_weight_size + intermediate_dense_bias_size
 
-                output_dense_weight_size = layer_module.output.dense.weight.element_size() * layer_module.output.dense.weight.nelement() / 1024 / 1024
-                output_dense_bias_size = layer_module.output.dense.bias.element_size() * layer_module.output.dense.bias.nelement() / 1024 / 1024
-                output_param_size = output_dense_weight_size + output_dense_bias_size
+            #     output_dense_weight_size = layer_module.output.dense.weight.element_size() * layer_module.output.dense.weight.nelement() / 1024 / 1024
+            #     output_dense_bias_size = layer_module.output.dense.bias.element_size() * layer_module.output.dense.bias.nelement() / 1024 / 1024
+            #     output_param_size = output_dense_weight_size + output_dense_bias_size
 
-                layer_norm_weight_size = layer_module.layernorm_before.weight.element_size() * layer_module.layernorm_before.weight.nelement() / 1024 / 1024
-                layer_norm_bias_size = layer_module.layernorm_before.bias.element_size() * layer_module.layernorm_before.bias.nelement() / 1024 / 1024
-                layer_norm_param_size = layer_norm_weight_size + layer_norm_bias_size
+            #     layer_norm_weight_size = layer_module.layernorm_before.weight.element_size() * layer_module.layernorm_before.weight.nelement() / 1024 / 1024
+            #     layer_norm_bias_size = layer_module.layernorm_before.bias.element_size() * layer_module.layernorm_before.bias.nelement() / 1024 / 1024
+            #     layer_norm_param_size = layer_norm_weight_size + layer_norm_bias_size
 
-                layer_norm_after_weight_size = layer_module.layernorm_after.weight.element_size() * layer_module.layernorm_after.weight.nelement() / 1024 / 1024
-                layer_norm_after_bias_size = layer_module.layernorm_after.bias.element_size() * layer_module.layernorm_after.bias.nelement() / 1024 / 1024
-                layer_norm_after_param_size = layer_norm_after_weight_size + layer_norm_after_bias_size
+            #     layer_norm_after_weight_size = layer_module.layernorm_after.weight.element_size() * layer_module.layernorm_after.weight.nelement() / 1024 / 1024
+            #     layer_norm_after_bias_size = layer_module.layernorm_after.bias.element_size() * layer_module.layernorm_after.bias.nelement() / 1024 / 1024
+            #     layer_norm_after_param_size = layer_norm_after_weight_size + layer_norm_after_bias_size
 
-                memory[i] = memory[i] + attention_param_size + intermediate_param_size + output_param_size + layer_norm_param_size + layer_norm_after_param_size
+            #     memory[i] = memory[i] + attention_param_size + intermediate_param_size + output_param_size + layer_norm_param_size + layer_norm_after_param_size
 
-                print(f"layer_{i}, {end_time/1000},0,{memory[i]},{layer_output_size},0")
+            #     print(f"layer_{i}, {end_time/1000},0,{memory[i]},{layer_output_size},0")
             
 
         if output_hidden_states:
