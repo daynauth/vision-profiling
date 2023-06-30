@@ -796,6 +796,8 @@ class YolosEncoder(nn.Module):
                 layer_outputs = layer_module(hidden_states, layer_head_mask, output_attentions)
                 self.ender.record()
                 torch.cuda.synchronize()
+                end_time = self.starter.elapsed_time(self.ender)
+
 
                 if not fine:
                     layer_output_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
