@@ -715,7 +715,8 @@ class YolosEncoder(nn.Module):
                 torch.cuda.synchronize()
                 end_time = self.starter.elapsed_time(self.ender)
                 interpolated_mid_position_embeddings_size = interpolated_mid_position_embeddings.element_size() * interpolated_mid_position_embeddings.nelement() / 1024 / 1024
-                print(f"Interpolation, {end_time/1000},0,218,{interpolated_mid_position_embeddings_size},0")
+                interpolated_mid_position_embeddings_weight_size = self.mid_position_embeddings.element_size() * self.mid_position_embeddings.nelement() / 1024 / 1024
+                print(f"Interpolation, {end_time/1000},0,{218 + interpolated_mid_position_embeddings_weight_size},{interpolated_mid_position_embeddings_size},0")
         memory = [
             1782,
             1120,
@@ -773,8 +774,9 @@ class YolosEncoder(nn.Module):
                             torch.cuda.synchronize()
                             end_time = self.starter.elapsed_time(self.ender)
                             interpolated_mid_position_embedding_size = interpolated_mid_position_embedding.element_size() * interpolated_mid_position_embedding.nelement() / 1024 / 1024
+                            interpolated_mid_position_embedding_weight_size = self.mid_position_embeddings[i].element_size() * self.mid_position_embeddings[i].nelement() / 1024 / 1024
                             layer = f"layer_{i}"
-                            print(f"layer_{i}_mid_position_embedding, {end_time/1000},0,{attention_memory[layer]['mid_position_embedding']},{interpolated_mid_position_embedding_size},0")
+                            print(f"layer_{i}_mid_position_embedding, {end_time/1000},0,{attention_memory[layer]['mid_position_embedding'] + interpolated_mid_position_embedding_weight_size/11},{interpolated_mid_position_embedding_size},0")
 
 
                         with nvtx.annotate(f"layer_{i}_add_mid_position_embedding", color="purple"):
