@@ -504,7 +504,8 @@ class YolosAttention(nn.Module):
             attention_output_weight_size = self.output.dense.weight.element_size() * self.output.dense.weight.nelement() / 1024 / 1024
             attention_output_bias_size = self.output.dense.bias.element_size() * self.output.dense.bias.nelement() / 1024 / 1024
             attention_output_param_size = attention_output_weight_size + attention_output_bias_size
-            print(f"{self.layer_name}_Self_Attention_Output, {end_time/1000},0,{attention_memory[self.layer_name]['Self_Attention_Output'] + attention_output_param_size},{attention_output_size},0")
+            if fine:
+                print(f"{self.layer_name}_Self_Attention_Output, {end_time/1000},0,{attention_memory[self.layer_name]['Self_Attention_Output'] + attention_output_param_size},{attention_output_size},0")
 
         outputs = (attention_output,) + self_outputs[1:]  # add attentions if we output them
         return outputs
