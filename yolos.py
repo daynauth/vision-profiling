@@ -869,7 +869,7 @@ class YolosEncoder(nn.Module):
                 layer_norm_after_bias_size = layer_module.layernorm_after.bias.element_size() * layer_module.layernorm_after.bias.nelement() / 1024 / 1024
                 layer_norm_after_param_size = layer_norm_after_weight_size + layer_norm_after_bias_size
 
-                memory[i] = attention_param_size + intermediate_param_size + output_param_size + layer_norm_param_size + layer_norm_after_param_size
+                memory[i] = memory[i] + attention_param_size + intermediate_param_size + output_param_size + layer_norm_param_size + layer_norm_after_param_size
 
                 print(f"layer_{i}, {end_time/1000},0,{memory[i]},{layer_output_size},0")
             
