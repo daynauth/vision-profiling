@@ -16,6 +16,30 @@ import math
 import time
 
 import nvtx
+import sys
+
+fine = True
+split = True
+
+num_args = len(sys.argv)
+
+arg1 = "true"
+arg2 = "true"
+
+if num_args > 1:
+    arg1 = sys.argv[1]
+
+if num_args > 2:
+    arg2 = sys.argv[2]
+
+if arg1 == "false":
+    fine = False
+
+if arg2 == "false":
+    split = False
+
+
+
 
 attention_memory = {
     "layer_0": {
@@ -332,7 +356,8 @@ class YolosSelfAttention(nn.Module):
             query_layer_weight_size = self.query.weight.element_size() * self.query.weight.nelement() / 1024 / 1024
             query_layer_bias_size = self.query.bias.element_size() * self.query.bias.nelement() / 1024 / 1024
             query_layer_param_size = query_layer_weight_size + query_layer_bias_size
-            print(f"{self.layer_name}_Query, {end_time/1000},0, {attention_memory[self.layer_name]['query'] + query_layer_param_size},{query_layer_size},0")
+            if fine:
+                print(f"{self.layer_name}_Query, {end_time/1000},0, {attention_memory[self.layer_name]['query'] + query_layer_param_size},{query_layer_size},0")
 
         with nvtx.annotate(f"{self.layer_name}_Key", color="purple"):
             self.start.record()
@@ -344,7 +369,8 @@ class YolosSelfAttention(nn.Module):
             key_layer_weight_size = self.key.weight.element_size() * self.key.weight.nelement() / 1024 / 1024
             key_layer_bias_size = self.key.bias.element_size() * self.key.bias.nelement() / 1024 / 1024
             key_layer_param_size = key_layer_weight_size + key_layer_bias_size
-            print(f"{self.layer_name}_Key, {end_time/1000},0,{attention_memory[self.layer_name]['key'] + key_layer_param_size},{key_layer_size},0")
+            if fine:
+                print(f"{self.layer_name}_Key, {end_time/1000},0,{attention_memory[self.layer_name]['key'] + key_layer_param_size},{key_layer_size},0")
 
         with nvtx.annotate(f"{self.layer_name}_Value", color="green"):
             self.start.record()
@@ -356,7 +382,8 @@ class YolosSelfAttention(nn.Module):
             value_layer_weight_size = self.value.weight.element_size() * self.value.weight.nelement() / 1024 / 1024
             value_layer_bias_size = self.value.bias.element_size() * self.value.bias.nelement() / 1024 / 1024
             value_layer_param_size = value_layer_weight_size + value_layer_bias_size
-            print(f"{self.layer_name}_Value, {end_time/1000},0,{attention_memory[self.layer_name]['value'] + value_layer_param_size},{value_layer_size},0")
+            if fine:
+                print(f"{self.layer_name}_Value, {end_time/1000},0,{attention_memory[self.layer_name]['value'] + value_layer_param_size},{value_layer_size},0")
 
 
         # Take the dot product between "query" and "key" to get the raw attention scores.
@@ -367,7 +394,8 @@ class YolosSelfAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             attention_scores_size = attention_scores.element_size() * attention_scores.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_mul, {end_time/1000},0,{attention_memory[self.layer_name]['mul']},{attention_scores_size},0")
+            if fine:
+                print(f"{self.layer_name}_mul, {end_time/1000},0,{attention_memory[self.layer_name]['mul']},{attention_scores_size},0")
 
 
 
@@ -378,7 +406,8 @@ class YolosSelfAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             attention_scores_size = attention_scores.element_size() * attention_scores.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_div, {end_time/1000},0,{attention_memory[self.layer_name]['div']},{attention_scores_size},0")
+            if fine:
+                print(f"{self.layer_name}_div, {end_time/1000},0,{attention_memory[self.layer_name]['div']},{attention_scores_size},0")
 
 
         # Normalize the attention scores to probabilities.
@@ -389,7 +418,8 @@ class YolosSelfAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             attention_probs_size = attention_probs.element_size() * attention_probs.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_softmax, {end_time/1000},0,{attention_memory[self.layer_name]['softmax']},{attention_probs_size},0")
+            if fine:
+                print(f"{self.layer_name}_softmax, {end_time/1000},0,{attention_memory[self.layer_name]['softmax']},{attention_probs_size},0")
 
         # This is actually dropping out entire tokens to attend to, which might
         # seem a bit unusual, but is taken from the original Transformer paper.
@@ -400,7 +430,8 @@ class YolosSelfAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             attention_probs_size = attention_probs.element_size() * attention_probs.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_dropout, {end_time/1000},0,{attention_memory[self.layer_name]['dropout']},{attention_probs_size},0")
+            if fine:
+                print(f"{self.layer_name}_dropout, {end_time/1000},0,{attention_memory[self.layer_name]['dropout']},{attention_probs_size},0")
 
         # Mask heads if we want to
         if head_mask is not None:
@@ -417,7 +448,8 @@ class YolosSelfAttention(nn.Module):
             torch.cuda.synchronize()
             end_time = self.start.elapsed_time(self.end)
             context_layer_size = context_layer.element_size() * context_layer.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_context, {end_time/1000},0,{attention_memory[self.layer_name]['context']},{context_layer_size},0")
+            if fine:
+                print(f"{self.layer_name}_context, {end_time/1000},0,{attention_memory[self.layer_name]['context']},{context_layer_size},0")
 
         outputs = (context_layer, attention_probs) if output_attentions else (context_layer,)
 
@@ -557,7 +589,8 @@ class YolosLayer(nn.Module):
             norm_output_weight_size = self.layernorm_before.weight.element_size() * self.layernorm_before.weight.nelement() / 1024 / 1024
             norm_output_bias_size = self.layernorm_before.bias.element_size() * self.layernorm_before.bias.nelement() / 1024 / 1024
             norm_param_size = norm_output_size + norm_output_weight_size + norm_output_bias_size
-            print(f"{self.layer_name}_Layer_Norm_Before, {end_time/1000},0,{norm_param_size},{norm_output_size},0")
+            if fine:
+                print(f"{self.layer_name}_Layer_Norm_Before, {end_time/1000},0,{norm_param_size},{norm_output_size},0")
 
         with nvtx.annotate(f"{self.layer_name}_Self_Attention_Forward", color="purple"):
             self.starter.record()
@@ -583,7 +616,8 @@ class YolosLayer(nn.Module):
             torch.cuda.synchronize()
             end_time = self.starter.elapsed_time(self.ender)
             hidden_states_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
-            print(f"{self.layer_name}_Residual_Connection_1, {end_time/1000},0,0,{hidden_states_size},0")
+            if fine:
+                print(f"{self.layer_name}_Residual_Connection_1, {end_time/1000},0,0,{hidden_states_size},0")
 
         # in Yolos, layernorm is also applied after self-attention
         with nvtx.annotate(f"{self.layer_name}_Layer_Norm_After", color="purple"):
@@ -596,7 +630,8 @@ class YolosLayer(nn.Module):
             layer_output_weight_size = self.layernorm_after.weight.element_size() * self.layernorm_after.weight.nelement() / 1024 / 1024
             layer_output_bias_size = self.layernorm_after.bias.element_size() * self.layernorm_after.bias.nelement() / 1024 / 1024
             layer_output_param_size = layer_output_weight_size + layer_output_bias_size
-            print(f"{self.layer_name}_Layer_Norm_After, {end_time/1000},0,{20 + layer_output_param_size},{layer_output_size},0")
+            if fine:
+                print(f"{self.layer_name}_Layer_Norm_After, {end_time/1000},0,{20 + layer_output_param_size},{layer_output_size},0")
 
         with nvtx.annotate(f"{self.layer_name}_Intermediate_Forward", color="green"):
             self.starter.record()
@@ -608,7 +643,8 @@ class YolosLayer(nn.Module):
             layer_output_weight_size = self.intermediate.dense.weight.element_size() * self.intermediate.dense.weight.nelement() / 1024 / 1024
             layer_output_bias_size = self.intermediate.dense.bias.element_size() * self.intermediate.dense.bias.nelement() / 1024 / 1024
             layer_output_param_size = layer_output_weight_size + layer_output_bias_size
-            print(f"{self.layer_name}_Intermediate_Forward, {end_time/1000},0,{70 + layer_output_param_size},{layer_output_size},0")
+            if fine:
+                print(f"{self.layer_name}_Intermediate_Forward, {end_time/1000},0,{70 + layer_output_param_size},{layer_output_size},0")
 
         # second residual connection is done here
         with nvtx.annotate(f"{self.layer_name}_Output", color="red"):
@@ -621,7 +657,8 @@ class YolosLayer(nn.Module):
             layer_output_weight_size = self.output.dense.weight.element_size() * self.output.dense.weight.nelement() / 1024 / 1024
             layer_output_bias_size = self.output.dense.bias.element_size() * self.output.dense.bias.nelement() / 1024 / 1024
             layer_output_param_size = layer_output_weight_size + layer_output_bias_size
-            print(f"{self.layer_name}_Output, {end_time/1000},0,{layer_output_param_size},{layer_output_size},0")
+            if fine:
+                print(f"{self.layer_name}_Output, {end_time/1000},0,{layer_output_param_size},{layer_output_size},0")
 
         outputs = (layer_output,) + outputs
 
@@ -661,7 +698,7 @@ class InterpolateMidPositionEmbeddings(nn.Module):
         return scale_pos_embed
     
 class YolosEncoder(nn.Module):
-    def __init__(self, config, split = False) -> None:
+    def __init__(self, config) -> None:
         super().__init__()
         self.config = config
         self.split = split
@@ -802,8 +839,38 @@ class YolosEncoder(nn.Module):
             self.ender.record()
             torch.cuda.synchronize()
             end_time = self.starter.elapsed_time(self.ender)
-            #layer_output_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
-            #print(f"layer_{i}, {end_time/1000},0,{memory[i]},{layer_output_size},0")
+
+            if not fine:
+                layer_output_size = hidden_states.element_size() * hidden_states.nelement() / 1024 / 1024
+                query_weight_size = layer_module.attention.attention.query.weight.element_size() * layer_module.attention.attention.query.weight.nelement() / 1024 / 1024
+                query_bias_size = layer_module.attention.attention.query.bias.element_size() * layer_module.attention.attention.query.bias.nelement() / 1024 / 1024
+                key_weight_size = layer_module.attention.attention.key.weight.element_size() * layer_module.attention.attention.key.weight.nelement() / 1024 / 1024
+                key_bias_size = layer_module.attention.attention.key.bias.element_size() * layer_module.attention.attention.key.bias.nelement() / 1024 / 1024
+                value_weight_size = layer_module.attention.attention.value.weight.element_size() * layer_module.attention.attention.value.weight.nelement() / 1024 / 1024
+                value_bias_size = layer_module.attention.attention.value.bias.element_size() * layer_module.attention.attention.value.bias.nelement() / 1024 / 1024
+                output_dense_weight_size = layer_module.attention.output.dense.weight.element_size() * layer_module.attention.output.dense.weight.nelement() / 1024 / 1024
+                output_dense_bias_size = layer_module.attention.output.dense.bias.element_size() * layer_module.attention.output.dense.bias.nelement() / 1024 / 1024
+                attention_param_size = query_weight_size + query_bias_size + key_weight_size + key_bias_size + value_weight_size + value_bias_size + output_dense_weight_size + output_dense_bias_size
+
+                intermediate_dense_weight_size = layer_module.intermediate.dense.weight.element_size() * layer_module.intermediate.dense.weight.nelement() / 1024 / 1024
+                intermediate_dense_bias_size = layer_module.intermediate.dense.bias.element_size() * layer_module.intermediate.dense.bias.nelement() / 1024 / 1024
+                intermediate_param_size = intermediate_dense_weight_size + intermediate_dense_bias_size
+
+                output_dense_weight_size = layer_module.output.dense.weight.element_size() * layer_module.output.dense.weight.nelement() / 1024 / 1024
+                output_dense_bias_size = layer_module.output.dense.bias.element_size() * layer_module.output.dense.bias.nelement() / 1024 / 1024
+                output_param_size = output_dense_weight_size + output_dense_bias_size
+
+                layer_norm_weight_size = layer_module.layernorm_before.weight.element_size() * layer_module.layernorm_before.weight.nelement() / 1024 / 1024
+                layer_norm_bias_size = layer_module.layernorm_before.bias.element_size() * layer_module.layernorm_before.bias.nelement() / 1024 / 1024
+                layer_norm_param_size = layer_norm_weight_size + layer_norm_bias_size
+
+                layer_norm_after_weight_size = layer_module.layernorm_after.weight.element_size() * layer_module.layernorm_after.weight.nelement() / 1024 / 1024
+                layer_norm_after_bias_size = layer_module.layernorm_after.bias.element_size() * layer_module.layernorm_after.bias.nelement() / 1024 / 1024
+                layer_norm_after_param_size = layer_norm_after_weight_size + layer_norm_after_bias_size
+
+                memory[i] = attention_param_size + intermediate_param_size + output_param_size + layer_norm_param_size + layer_norm_after_param_size
+
+                print(f"layer_{i}, {end_time/1000},0,{memory[i]},{layer_output_size},0")
             
 
         if output_hidden_states:
@@ -906,7 +973,19 @@ class YolosModel(YolosPreTrainedModel):
         torch.cuda.synchronize()
         end_time = self.starter.elapsed_time(self.ender)
         embedding_output_size = embedding_output.element_size() * embedding_output.nelement() / 1024 / 1024
-        print(f"Embedding, {end_time/1000},0,48.14,{embedding_output_size},0")
+
+        embedding_output_weight_size = self.embeddings.patch_embeddings.projection.weight.element_size() * self.embeddings.patch_embeddings.projection.weight.nelement() / 1024 / 1024
+        embedding_output_bias_size = self.embeddings.patch_embeddings.projection.bias.element_size() * self.embeddings.patch_embeddings.projection.bias.nelement() / 1024 / 1024
+
+        embedding_cls_weight_size = self.embeddings.cls_token.element_size() * self.embeddings.cls_token.nelement() / 1024 / 1024
+        embedding_det_weight_size = self.embeddings.detection_tokens.element_size() * self.embeddings.detection_tokens.nelement() / 1024 / 1024
+
+        embedding_pos_weight_size = self.embeddings.position_embeddings.element_size() * self.embeddings.position_embeddings.nelement() / 1024 / 1024
+
+        embedding_param_size = embedding_output_weight_size + embedding_output_bias_size + embedding_cls_weight_size + embedding_det_weight_size + embedding_pos_weight_size
+
+
+        print(f"Embedding, {end_time/1000},0,{48.14 + embedding_param_size},{embedding_output_size},0")
 
 
         encoder_outputs = self.encoder(
