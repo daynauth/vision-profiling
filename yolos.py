@@ -629,9 +629,8 @@ class YolosLayer(nn.Module):
 
 
 class InterpolateMidPositionEmbeddings(nn.Module):
-    def __init__(self, config, split = False) -> None:
+    def __init__(self, config) -> None:
         super().__init__()
-        self.split = split
         self.config = config
 
     def forward(self, pos_embed, img_size=(800, 1344)) -> torch.Tensor:
@@ -662,7 +661,7 @@ class InterpolateMidPositionEmbeddings(nn.Module):
         return scale_pos_embed
     
 class YolosEncoder(nn.Module):
-    def __init__(self, config, split = True) -> None:
+    def __init__(self, config, split = False) -> None:
         super().__init__()
         self.config = config
         self.split = split
