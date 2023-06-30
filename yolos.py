@@ -629,7 +629,7 @@ class YolosLayer(nn.Module):
 
 
 class InterpolateMidPositionEmbeddings(nn.Module):
-    def __init__(self, config, split = True) -> None:
+    def __init__(self, config, split = False) -> None:
         super().__init__()
         self.split = split
         self.config = config
