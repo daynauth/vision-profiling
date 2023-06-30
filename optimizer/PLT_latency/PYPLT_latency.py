@@ -24,12 +24,12 @@ def draw(config):
     line1 = ax1.plot(df_file['bandwidth'], plot_data,
                      color=sns.xkcd_rgb["pale red"],
                      linestyle='-',
-                     label='Optimization speed up')
+                     label='Optimization Improvement')
     p1 = ax1.scatter(df_file['bandwidth'], plot_data,
                      color=sns.xkcd_rgb["pale red"],
                      marker='o',
                      s=30,
-                     label='Optimization speed up')
+                     label='Optimization Improvement')
 
     for i, j, d in zip(df_file['bandwidth'], plot_data, df_file["device"]):
         ax1.annotate('%s' % d, xy=(i, j), xytext=(-7, 3), textcoords='offset points', color=sns.xkcd_rgb["green"])
@@ -39,7 +39,7 @@ def draw(config):
 
     # ax1.set_ylim(ymin=0)
     ax1.set_xlabel("Bandwidth (Mbps)", fontsize=12)
-    ax1.set_ylabel("Optimization speed up (%)", fontsize=12)
+    ax1.set_ylabel("Optimization Improvement (%)", fontsize=12)
     # ax1.set_title(f"{config}", fontsize=14)
     if min(plot_data) > 0:
         ax1.set_ylim(ymin=0, ymax=(max(plot_data + 2)))

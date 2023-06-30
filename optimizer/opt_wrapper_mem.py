@@ -68,7 +68,7 @@ class OPT_WRAPPER(object):
              'yolor': [300],
              'yolov4': [300],
              'faster': [300],
-             'yolos': [*range(2000, 4000, 250)],
+             'yolos':  [*range(2000, 5750, 250)] #[*range(4000, 5750, 250)],
              },
         'nano':
             {'yolox': [300],
@@ -92,7 +92,7 @@ class OPT_WRAPPER(object):
         self.bandwidth_list = [bw * 0.125 for bw in self.bandwidth_list]  # turn to MBps
 
         self.iterations_default = 5
-        self.num_devices_max = 100
+        self.num_devices_max = 15
         self.threshold = threshold
 
         self.opt_num_devices = []
@@ -138,7 +138,7 @@ class OPT_WRAPPER(object):
     def optimize(self):
         self.get_path()
 
-        for bandwidth in self.bandwidth_list:
+        for bandwidth in tqdm(self.bandwidth_list):
             across_devices = []
             for num_devices in range(1, self.num_devices_max + 1):
                 # try different optimization heuristics
@@ -241,5 +241,5 @@ if __name__ == '__main__':
           f"meaning that if increasing num_devices by one results in a change of speed up rate less than {1 - threshold},"
           f" opt_num_devices won't be updated\n")
 
-    for config in tqdm(OPT_WRAPPER.configs):
+    for config in OPT_WRAPPER.configs:
         driver(config, threshold)

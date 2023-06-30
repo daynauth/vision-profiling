@@ -64,12 +64,14 @@ class OPT_WRAPPER(object):
              'yolor': [*range(250, 4500, 150)],
              'yolov4': [*range(250, 4500, 150)],
              'faster': [*range(900, 3400, 100)],
-             'yolos': [*range(900, 3400, 100)]},
+             'yolos': [*range(2000, 5750, 250)]
+            },
         'nano':
             {'yolox': [*range(250, 4500, 150)],
              'yolor': [*range(250, 4500, 150)],
              'yolov4': [*range(250, 8000, 250)],
-             'faster': [*range(900, 3400, 100)]},
+             'faster': [*range(900, 3400, 100)]
+             },
     }
 
     def __init__(self, config, bandwidth_list=None, threshold=0.99):
@@ -132,7 +134,7 @@ class OPT_WRAPPER(object):
             benchmark=self.benchmark,
             reverse0=reverse0,
             reverse1=reverse1,
-            dir=f"testcases/{self.config}",
+            dir=f"testcases/{self.config}/{POWER_MODE}",
         )
         return opt
 
