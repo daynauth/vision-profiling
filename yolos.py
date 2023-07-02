@@ -753,7 +753,7 @@ class YolosEncoder(nn.Module):
                 end_time = self.starter.elapsed_time(self.ender)
                 interpolated_mid_position_embeddings_size = interpolated_mid_position_embeddings.element_size() * interpolated_mid_position_embeddings.nelement() / 1024 / 1024
                 interpolated_mid_position_embeddings_weight_size = self.mid_position_embeddings.element_size() * self.mid_position_embeddings.nelement() / 1024 / 1024
-                print(f"Interpolation, {end_time/1000},0,{218 + interpolated_mid_position_embeddings_weight_size},{interpolated_mid_position_embeddings_size},0")
+                print(f"Interpolation, {end_time/1000},0,{218 + interpolated_mid_position_embeddings_weight_size},{interpolated_mid_position_embeddings_size/11},0")
         memory = [
             1782,
             1120,
