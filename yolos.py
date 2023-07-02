@@ -32,10 +32,10 @@ if num_args > 1:
 if num_args > 2:
     arg2 = sys.argv[2]
 
-if arg1 == "false":
+if str(arg1).lower() == "false":
     fine = False
 
-if arg2 == "false":
+if str(arg2).lower() == "false":
     split = False
 
 
