@@ -1259,3 +1259,11 @@ def test():
 
 
 test()
+if fine == True and split == True:
+    print("fine,split")
+elif fine == True and split == False:
+    print("fine,not split")
+elif fine == False and split == True:
+    print("not fine,split")
+else:
+    print("not fine,not split")
