@@ -7,3 +7,6 @@
 [submodule "detect/yolov4"]
 	path = detect/yolov4
 	url = https://github.com/Tianxiaomo/pytorch-YOLOv4
+[submodule "paper"]
+	path = paper
+	url = git@github.com:daynauth/NS-Swarm---Asplos.git
