@@ -36,18 +36,33 @@ def get_type_data(folder, type):
     return df
     
 
+def plot_device(ax):
+    y = [2000,2000,3000,4000]
+    x = [1,2,3,4]
+
+    ax.bar(x, y, width=0.6, color='darkslateblue', label = "devices")
+
+    ax.set_title("Devices", verticalalignment='bottom', y=0, pad=-40)
+    #ax.set_yticklabels([])
+
+
+
+
+def plot_models(ax, df):
+    y = 'mem'
+    ylabel = "Memory (MB)"
+
+    ax.bar(df['model'], df[y], color="darkred", width=0.6)
+    ax.set_title("Models", verticalalignment='bottom', y=0, pad=-40)
+    ax.set_ylabel(ylabel, fontsize=20)
+
+
 def plot_combined(folder, type = 'mem', save_dir = './', ext = 'png'):
+    df = get_mem_data(folder)
 
 
-    df = get_type_data(folder, type)
-    y = 'time'
-
-    fig, ax1 = plt.subplots()
+    fig, ax1 = plt.subplots(nrows=1, ncols=2, sharey=True)
     fig.set_size_inches(6, 3)
-
-    df.plot.bar(x='model', y=y, ax=ax1, color="darkred", width=0.6, legend=False)
-
-
     
     plt.xlabel("")
     plt.grid(axis='y', linestyle='--')
@@ -55,21 +70,28 @@ def plot_combined(folder, type = 'mem', save_dir = './', ext = 'png'):
 
     save_file  = ''
 
-    ylabel = "Time (ms)"
-    save_file = os.path.join(save_dir, f'{type}.{ext}')
+
+
+    for ax in ax1:
+        ax.set_ylim([0, 7000])
+
+
+    plot_models(ax1[0], df)
+    plot_device(ax1[1])
+
+
+
+    save_file = os.path.join(save_dir, f'combined_mem_device.{ext}')
+
 
     plt.subplots_adjust(wspace=0, hspace=0)
 
+    for ax in ax1:
+        ax.grid(which='major', linestyle='--', linewidth='0.5', color='grey')
 
-    ax1.grid(which='major', linestyle='--', linewidth='0.5', color='grey')
+    ax1[0].tick_params(axis='both', which='major', labelsize=15)
+    plt.xticks(rotation=0, ha='center', fontsize=12)
 
-
-    ax1.set_ylabel(ylabel, fontsize=20)
-    ax1.tick_params(axis='both', which='major', labelsize=15)
-
-
-
-    plt.xticks(rotation=0, ha='center', fontsize=15)
     plt.savefig(save_file, bbox_inches='tight')
     plt.close()
 
@@ -92,8 +114,8 @@ if __name__ == '__main__':
 
     args = argparser.parse_args()
 
-    types = ['agx1', 'nano1']
-    #types = ['mem']
 
-    for type in types:
-        plot_combined(args.file_dir, type, args.save_dir, args.extension)
+
+
+
+    plot_combined(args.file_dir, 'mem', args.save_dir, args.extension)
