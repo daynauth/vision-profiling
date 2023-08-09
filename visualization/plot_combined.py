@@ -5,8 +5,9 @@ import argparse
 
 from matplotlib import rc
 
-rc('font',**{'family':'serif','serif':['Palatino']})
-rc('text', usetex=True)
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('font',**{'family':'serif'})
+# rc('text', usetex=True)
 
 from matplotlib import pyplot as plt
 
@@ -43,33 +44,40 @@ def plot_combined(folder, type = 'mem', save_dir = './', ext = 'png'):
     y = 'time'
 
     fig, ax1 = plt.subplots()
-    fig.set_size_inches(6, 3)
+    fig.set_size_inches(8, 4.5)
 
-    df.plot.bar(x='model', y=y, ax=ax1, color="darkred", width=0.6, legend=False)
-
-
+    plot_order = ["yolor", "faster", "yolov4", "yolox"]
+    df = df.set_index("model").reindex(plot_order).reset_index()
+    mapping = {
+        "faster": "FRCNN",
+        "yolor": "YOLOR",
+        "yolov4": "YOLOv4",
+        "yolox": "YOLOX"
+    }
+    df["model"] = df["model"].replace(mapping)
+    df.plot.bar(x='model', y=y, ax=ax1, color="skyblue", width=0.6, legend=False, linewidth=2, edgecolor="grey")
     
     plt.xlabel("")
-    plt.grid(axis='y', linestyle='--')
+    plt.grid(axis='y', linestyle='-')
 
 
     save_file  = ''
 
-    ylabel = "Time (ms)"
+    ylabel = "Latency (s)"
     save_file = os.path.join(save_dir, f'{type}.{ext}')
 
     plt.subplots_adjust(wspace=0, hspace=0)
 
 
-    ax1.grid(which='major', linestyle='--', linewidth='0.5', color='grey')
+   #  ax1.grid(which='major', linestyle='--', linewidth='0.5', color='grey')
 
 
-    ax1.set_ylabel(ylabel, fontsize=20)
-    ax1.tick_params(axis='both', which='major', labelsize=15)
+    ax1.set_ylabel(ylabel, fontsize=24)
+    ax1.tick_params(axis='both', which='major', labelsize=24)
 
 
 
-    plt.xticks(rotation=0, ha='center', fontsize=15)
+    plt.xticks(rotation=0, ha='center', fontsize=24)
     plt.savefig(save_file, bbox_inches='tight')
     plt.close()
 
