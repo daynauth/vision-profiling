@@ -55,7 +55,7 @@ def plot_combined(folder, type = 'mem', save_dir = './', ext = 'png'):
         "yolox": "YOLOX"
     }
     df["model"] = df["model"].replace(mapping)
-    df.plot.bar(x='model', y=y, ax=ax1, color="skyblue", width=0.6, legend=False, linewidth=2, edgecolor="grey")
+    df.plot.bar(x='model', y=y, ax=ax1, color="steelblue", width=0.6, legend=False, linewidth=2, edgecolor="grey")
     
     plt.xlabel("")
     plt.grid(axis='y', linestyle='-')

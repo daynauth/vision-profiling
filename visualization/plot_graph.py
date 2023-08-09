@@ -5,8 +5,9 @@ import argparse
 
 from matplotlib import rc
 
-rc('font',**{'family':'serif','serif':['Palatino']})
-rc('text', usetex=True)
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('font',**{'family':'serif'})
+#rc('text', usetex=True)
 
 from matplotlib import pyplot as plt
 
@@ -29,13 +30,15 @@ def plot_graph(model, file_dir, save_dir, extension='png', plot_info=None):
     df = pd.read_csv(file)
 
     fig, ax1 = plt.subplots()
-    fig.set_size_inches(model_width[model], 2.5)
+    fig.set_size_inches(model_width[model], 2)
 
     #use ax1 to plot bar chart with index as x values and column 'mem' as y values
     df.plot.bar(x='layer', y=plot_info['column'], ax=ax1, color=plot_info['color'], width=0.6, legend=False)
 
-
-    plt.ylabel(plot_info['ylabel'], fontsize=16)
+    if plot_info["name"] == "out":
+        plt.ylabel(plot_info['ylabel'], fontsize=13)
+    else:
+        plt.ylabel(plot_info['ylabel'], fontsize=16)
     plt.xlabel("Layers", fontsize=16)
     plt.yticks(fontsize=16)
 
@@ -53,7 +56,7 @@ if __name__ == '__main__':
     plots = {'mem' : {
         'name' : 'mem',
         'folder' : 'mem_plot',
-        'color' : 'darkred',
+        'color' : 'darkgoldenrod',
         'column' : 'mem',
         'ylabel' : 'Memory (MB)',
         'suffix' : 'mem'
@@ -61,15 +64,15 @@ if __name__ == '__main__':
     'time' : {
         'name' : 'time',
         'folder' : 'per_layer_time_plot',
-        'color' : 'darkblue',
+        'color' : 'steelblue',
         'column' : 'nano_1',
-        'ylabel' : 'Time (ms)',
+        'ylabel' : 'Latency (s)',
         'suffix' : 'layer'
     },
     'out' : {
         'name' : 'out',
         'folder' : 'output_size_plot',
-        'color' : 'darkgreen',
+        'color' : 'olivedrab',
         'column' : 'size',
         'ylabel' : 'Output Size (MB)',
         'suffix' : 'out'
@@ -79,7 +82,7 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-f', '--file-dir', type=str, default='../NS-DOT-visualizers/')
     argparser.add_argument('-s', '--save-dir', type=str, default='./')
-    argparser.add_argument('-e', '--extension', type=str, default='png')
+    argparser.add_argument('-e', '--extension', type=str, default='pdf')
     argparser.add_argument('-p', '--plot', type=str, default='mem')
 
     

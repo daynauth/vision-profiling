@@ -64,7 +64,7 @@ def plot_models(ax, df):
     df["model"] = df["model"].replace(mapping)
     df[y] /= 1000
  
-    ax.bar(df['model'], df[y], color="goldenrod", width=0.6, edgecolor="grey", linewidth=1.5)
+    ax.bar(df['model'], df[y], color="darkgoldenrod", width=0.6, edgecolor="grey", linewidth=1.5)
     # ax.set_title("Models", verticalalignment='bottom', y=0, pad=-40)
     ax.set_ylabel(ylabel, fontsize=24)
 
