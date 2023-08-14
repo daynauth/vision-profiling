@@ -17,6 +17,7 @@ model_width = {
     'yolox': 4,
     'yolov4': 12,
     'faster': 4,
+    'yolos': 12
 }
 
 
@@ -45,6 +46,8 @@ def plot_graph(model, file_dir, save_dir, extension='png', plot_info=None):
 
     plt.xticks([])
     plt.grid(axis='y', linestyle='--')
+    file_name = f"{model}_{plot_info['name']}_v2.{extension}"
+    print(f'Saving plot {file_name}')
     file = os.path.join(save_dir, f"{model}_{plot_info['name']}_v2.{extension}")
     plt.savefig(file, bbox_inches='tight')
 
@@ -52,7 +55,7 @@ def plot_graph(model, file_dir, save_dir, extension='png', plot_info=None):
 
 
 if __name__ == '__main__':
-    models = ['yolor', 'yolox', 'yolov4', 'faster']
+    models = ['yolor', 'yolox', 'yolov4', 'faster', 'yolos']
     plots = {'mem' : {
         'name' : 'mem',
         'folder' : 'mem_plot',
@@ -65,7 +68,7 @@ if __name__ == '__main__':
         'name' : 'time',
         'folder' : 'per_layer_time_plot',
         'color' : 'steelblue',
-        'column' : 'nano_1',
+        'column' : 'agx_1', #nano_1, #nano_0, #agx_1, #agx_0, etc ...
         'ylabel' : 'Latency (s)',
         'suffix' : 'layer'
     },
@@ -83,10 +86,11 @@ if __name__ == '__main__':
     argparser.add_argument('-f', '--file-dir', type=str, default='../NS-DOT-visualizers/')
     argparser.add_argument('-s', '--save-dir', type=str, default='./')
     argparser.add_argument('-e', '--extension', type=str, default='pdf')
-    argparser.add_argument('-p', '--plot', type=str, default='mem')
+    argparser.add_argument('-p', '--plot', type=str, default='out')
 
     
-
+    #df = pd.read_csv("../optimizer/testcases/yolos-agx/1/prof_fine_split.csv")
+    #df.to_csv('../NS-DOT-visualizers/per_layer_time_plot/prof_yolos_layer.csv', columns=['layer_name','time'], index=False)
 
     args = argparser.parse_args()
 
