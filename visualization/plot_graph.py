@@ -37,11 +37,11 @@ def plot_graph(model, file_dir, save_dir, extension='png', plot_info=None):
     df.plot.bar(x='layer', y=plot_info['column'], ax=ax1, color=plot_info['color'], width=0.6, legend=False)
 
     if plot_info["name"] == "out":
-        plt.ylabel(plot_info['ylabel'], fontsize=13)
+        plt.ylabel(plot_info['ylabel'], fontsize=10)
     else:
-        plt.ylabel(plot_info['ylabel'], fontsize=16)
-    plt.xlabel("Layers", fontsize=16)
-    plt.yticks(fontsize=16)
+        plt.ylabel(plot_info['ylabel'], fontsize=10)
+    plt.xlabel("Layers", fontsize=10)
+    plt.yticks(fontsize=8)
 
 
     plt.xticks([])
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         'folder' : 'output_size_plot',
         'color' : 'olivedrab',
         'column' : 'size',
-        'ylabel' : 'Output Size (MB)',
+        'ylabel' : 'Input Size (MB)',
         'suffix' : 'out'
     }}
 
